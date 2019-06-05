@@ -5,10 +5,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.antonioleiva.mymovies.R
-import com.antonioleiva.mymovies.ui.common.app
-import com.antonioleiva.mymovies.ui.common.getViewModel
 import com.antonioleiva.mymovies.ui.common.loadUrl
 import kotlinx.android.synthetic.main.activity_detail.*
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
+import org.koin.core.parameter.parametersOf
 
 class DetailActivity : AppCompatActivity() {
 
@@ -16,15 +17,14 @@ class DetailActivity : AppCompatActivity() {
         const val MOVIE = "DetailActivity:movie"
     }
 
-    private lateinit var component: DetailActivityComponent
-    private val viewModel by lazy { getViewModel { component.detaiViewModel } }
+    private val viewModel: DetailViewModel by lifecycleScope.viewModel(this) {
+        parametersOf(intent.getIntExtra(MOVIE, -1))
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-
-        component = app.component.plus(DetailActivityModule(intent.getIntExtra(MOVIE, -1)))
 
         viewModel.model.observe(this, Observer(::updateUi))
 
